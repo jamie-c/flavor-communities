@@ -40,19 +40,22 @@ def get_connected_elements(uuid):
 def update_elements_list(uuid, community):
 
     communities = [
-        (0, ""),
+        (0, "#00FFFF"),
         (1, "#FF0000"),
         (2, "#0000FF"),
         (3, "#00FF00"),
-        (4, "#"),
-        (5, "#")
+        (4, "#FFFF00"),
+        (5, "#FF00FF"),
+        (6, "#0FFFF0"),
+        (7, "#8000FF"),
+        (8, "#FF0080"),
+        (9, "#FF8000")
         ]
     
 
     return {
                 "target": {
                     "uuid": f"{uuid}",
-                    "typeName": "ingredient"
                 },
                 "data": {
                     "properties": {
@@ -78,6 +81,13 @@ def response(post_type, data):
     r = requests.post(f"{api_url}/{api_route}", params=payload, headers=headers, json=post_type(data))
     return r.json()['data'][0]
         
+def update_response(post_type, data):
+    post_type = globals()[post_type]
+    r = requests.post(f"{api_url}/{api_route}", params=payload, headers=headers, json=post_type(data))
+    result_status = r.json()['statusCode']
+    print(f"Update resulted in status: {result_status}")
+    return result_status
+
 #if __name__ == "__main__":
 #    api_call = MakeApiCall(f"{api_url}/{api_route}")
 
@@ -89,7 +99,8 @@ community_info = {
     'salt': 5
     }
 
-# element_list = []
+element_list = []
+flavor_list = []
 
 # Initialize flavor network
 flavor_network = nx.Graph()
@@ -99,8 +110,6 @@ flavor_network = nx.Graph()
 # ingredients = response('list_elements', 'ingredient')
 flavors = response('list_elements', 'flavor')
 
-# Print the word Ingredients:
-print("Ingredients:")
 
 # Using data from ingredients api call above, iterate trough data and print ingredient name, and add ingredient as a node.
 # Will comment this section out as the network can be built from the flavor nodes and connections
@@ -119,40 +128,50 @@ print("Ingredients:")
 #     # Set community number and color based on connection name
 #     element_list.append(update_elements_list(item['uuid'], community_info[conn_name]))
        
-# Print the word Flavors:
-print("Flavors:")
 
 # Using data from flavors api call above, iterate through data and add each flavor as a node, and print the name of the flavor
 for item in flavors: 
 
     flavor = item['properties']['name'] # store the name in a variable
-    flavor_network.add_node(f"{flavor}")       # add node to flavor network
-    print(item['properties']['name'])   # print the flavor name
+    flavor_uuid = item['uuid']
+    flavor_list.append(flavor_uuid)
+    flavor_network.add_node(f"{flavor_uuid}")       # add node to flavor network
+    print(flavor_uuid)   # print the flavor uuid
 
     # With each flavor, we want the edges... the edge name, and the connected element name.
-    connections = response('get_connected_elements', item['uuid'])  # returns a list of objects
+    connections = response('get_connected_elements', flavor_uuid)  # returns a list of objects
 
     # Using the connections object for the data, we now need to get the nodes and edges.
     # flavor_edges = connections['data'][0]   # returns a list of objects
 
     for edge in connections:
-        node = edge['element']['properties']['name']
-        c_color = edge['element']['properties']['Community_Color']
-        c_number = edge['element']['properties']['Community_Number']
+        node = edge['element']['uuid']
+        # c_color = edge['element']['properties']['Community_Color']
+        # c_number = edge['element']['properties']['Community_Number']
 
         flavor_network.add_node(f"{node}")
-        flavor_network.add_edge(f"{flavor}", f"{node}")
+        flavor_network.add_edge(f"{flavor_uuid}", f"{node}")
 
     # Iterate through the data and add to the flavor network
 
 
-print(flavor_network)
-print(dict(flavor_network.nodes.data()))
+# print(flavor_network)
+# print(dict(flavor_network.nodes.data()))
 # comp = nx.community.girvan_newman(flavor_network, most_valuable_edge=None)
 c = nx.community.naive_greedy_modularity_communities(flavor_network)
 # nx.draw(c, with_labels=True, font_weight='bold')
 # plt.show()
-print(c)
+# print(c)
 
 # response('update_elements', element_list)
+
+for i, set in enumerate(c):
+    community_number = i
+    print(f"Updating community number {community_number}")
+    for uuid in set: 
+        print(f"Adding Item to List: {uuid}")
+        if uuid not in flavor_list:
+            element_list.append(update_elements_list(uuid, community_number))
+    update_response('update_elements', element_list)
+# print(element_list)
 
