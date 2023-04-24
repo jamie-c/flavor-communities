@@ -1,6 +1,8 @@
 from neo4j import GraphDatabase
 import logging
 from neo4j.exceptions import ServiceUnavailable
+import os
+from dotenv.main import load_dotenv
 
 class App:
 
@@ -72,11 +74,11 @@ class App:
 
 
 if __name__ == "__main__":
+    load_dotenv()
     # Aura queries use an encrypted connection using the "neo4j+s" URI scheme
     uri = "neo4j+s://fb87e512.databases.neo4j.io"
     user = "neo4j"
-    password = "9fi9CdqeDf8FxJdmfWLw3cpA_rHgxYzLdDZA"
+    password = os.environ['FN_API_KEY'] 
     app = App(uri, user, password)
-    app.create_have_flavor("Sugar", "Sweet")
-    app.find_ingredient("Sugar")
+    app.create_have_flavor("Apple", "Sweet")
     app.close()
