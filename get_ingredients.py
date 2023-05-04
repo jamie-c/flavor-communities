@@ -1,6 +1,7 @@
 # file get_ingredients.py
 
 import os
+import re
 
 # Define current working directory to build filepath to read recipe files
 def full_path(file_name: str) -> str:
@@ -21,6 +22,16 @@ UNITS_OF_MEASURE = ['g', 'gram', 'oz', 'ounce', 'lb', 'pound', 'ea', 'each', 'sm
 
 ingredients_list = []
 
+def search_for_recipe_files(directory: str) -> list:
+    """
+    Use the given string as a directory to get every file that has the word 'recipe' and ends with '.md'
+    """
+    recipe_files = []
+    for filename in os.listdir(directory):
+        if filename.endswith('.md') and 'recipe' in filename:
+            recipe_files.append(filename)
+    return recipe_files
+
 def recipe_ingredients_section(file_path: str) -> list:
     """
     Use the given string as a filepath to open a file and return its contents.
@@ -35,9 +46,11 @@ def recipe_ingredients_section(file_path: str) -> list:
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
-    ingredients_start = lines.index('**INGREDIENTS**  \n')
-    ingredients_end = lines.index('  \n', ingredients_start)
-    return lines[ingredients_start + 1 : ingredients_end]
+    if '**INGREDIENTS**  \n' in lines:
+        ingredients_start = lines.index('**INGREDIENTS**  \n')
+        if '  \n' in lines:
+            ingredients_end = lines.index('  \n', ingredients_start)
+            return lines[ingredients_start + 1 : ingredients_end]
 
 def is_unit_of_measure(word: str) -> bool:
     """
@@ -137,12 +150,32 @@ def join_words(word: str, words: list) -> str:
         return ' '.join(words[i:])
 
 
+for recipe_file in search_for_recipe_files('recipes_and_standards'):
+    
+    if recipe_ingredients_section(full_path(recipe_file)) != None:
+        for line in recipe_ingredients_section(full_path(recipe_file)):
 
-for line in recipe_ingredients_section(full_path('cheesy_queso.md')):
-    words = line.split()
-    for word in words:
-        if is_unit_of_measure(word):
-            ing = join_words(word, words)
-            add_ingredient(ing, ingredients_list)
+            words = line.split()
+            for word in words:
+
+                if is_unit_of_measure(word):
+
+                    ing = join_words(word, words)
+                    
+                    # remove unit conversions listed in parentheses i.e. 227 g (1 cup)
+                    pattern = '[(]*[)]'
+                    if re.search(pattern, ing):
+                        ing = re.split(pattern, ing)[1].lstrip()
+
+                    # remove commas i.e. red bell peppers, diced
+                    pattern = ','
+                    if pattern in ing:
+                        ing = ing.split(pattern)[0]
+
+                    # [] TODO: remove trailing ~ characters
+                    # [] TODO: account for ingredients with an alternative ingredient listed after 'or'
+
+                    add_ingredient(ing, ingredients_list)
             
 print(ingredients_list)
+
