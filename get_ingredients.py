@@ -184,6 +184,12 @@ def split_ingredient_line(line: str) -> list:
 
     ing = remove_ending_char(ing, '~') 
 
+    # skip ingredients with these characters:
+    skip_chars = ['.', ']', '/']
+    for item in skip_chars:
+        if item in ing:
+            return None
+
     return ing
 
 recipes_files_list = search_for_recipe_files('recipes_and_standards')
@@ -221,8 +227,9 @@ for recipe_file in recipes_files_list:
                     # ing = remove_ending_char(ing, '~')
 
                     # # [] TODO: account for ingredients with an alternative ingredient listed after 'or'
-
-                    add_ingredient(ing, ingredients_list)
+                    
+                    if ing != None:
+                        add_ingredient(ing, ingredients_list)
             
 print(ingredients_list)
 
