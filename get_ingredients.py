@@ -149,11 +149,50 @@ def join_words(word: str, words: list) -> str:
         i = words.index(word) + 1
         return ' '.join(words[i:])
 
-
-for recipe_file in search_for_recipe_files('recipes_and_standards'):
+def split_ingredient_line(line: str) -> list:
+    """
+    for a given word, split the string to get everything after the word
+    further split the line if it contains a () before the ingredient
+    further split the line if it contains a ',*' after the ingredient
+    split the line if it contains 'or' with another ingredient following
+    """
+    ing = line
+    # store ingredient(s) in list
+    ing_list = []
     
-    if recipe_ingredients_section(full_path(recipe_file)) != None:
-        for line in recipe_ingredients_section(full_path(recipe_file)):
+    # remove unit conversions listed in parentheses i.e. (1 cup) flour -> flour
+    pattern = '[(]*[)]'
+    if re.search(pattern, ing):
+        ing = re.split(pattern, ing)[1].lstrip()
+
+    # remove commas i.e. red bell peppers, diced -> red bell peppers
+    pattern = ','
+    if pattern in ing:
+        ing = ing.split(pattern)[0]
+
+    if ' or ' in ing:
+        ing = ing.split(' or ')[0]
+        # ing_alt = ing.split(' or ')[1]
+        # [] TODO: extract ingredient from the ing_alt string
+
+    # remove trailing ~ characters
+    def remove_ending_char(s, c):
+        if s.endswith(c):
+            return remove_ending_char(s[:-1], c)
+        else:
+            return s
+
+    ing = remove_ending_char(ing, '~') 
+
+    return ing
+
+recipes_files_list = search_for_recipe_files('recipes_and_standards')
+
+for recipe_file in recipes_files_list:
+    ingredients_section = recipe_ingredients_section(full_path(recipe_file))
+    
+    if ingredients_section != None:
+        for line in ingredients_section:
 
             words = line.split()
             for word in words:
@@ -161,19 +200,27 @@ for recipe_file in search_for_recipe_files('recipes_and_standards'):
                 if is_unit_of_measure(word):
 
                     ing = join_words(word, words)
+                    ing = split_ingredient_line(ing)
                     
-                    # remove unit conversions listed in parentheses i.e. 227 g (1 cup)
-                    pattern = '[(]*[)]'
-                    if re.search(pattern, ing):
-                        ing = re.split(pattern, ing)[1].lstrip()
+                    # # remove unit conversions listed in parentheses i.e. 227 g (1 cup)
+                    # pattern = '[(]*[)]'
+                    # if re.search(pattern, ing):
+                    #     ing = re.split(pattern, ing)[1].lstrip()
 
-                    # remove commas i.e. red bell peppers, diced
-                    pattern = ','
-                    if pattern in ing:
-                        ing = ing.split(pattern)[0]
+                    # # remove commas i.e. red bell peppers, diced
+                    # pattern = ','
+                    # if pattern in ing:
+                    #     ing = ing.split(pattern)[0]
 
-                    # [] TODO: remove trailing ~ characters
-                    # [] TODO: account for ingredients with an alternative ingredient listed after 'or'
+                    # # remove trailing ~ characters
+                    # def remove_ending_char(s, c):
+                    #     if s.endswith(c):
+                    #        return remove_ending_char(s[:-1], c)
+                    #     else:
+                    #         return s
+                    # ing = remove_ending_char(ing, '~')
+
+                    # # [] TODO: account for ingredients with an alternative ingredient listed after 'or'
 
                     add_ingredient(ing, ingredients_list)
             
