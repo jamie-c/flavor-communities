@@ -2,19 +2,57 @@
 
 import os
 import re
+import time
+
+start_time = time.time()
+
 
 # Define current working directory to build filepath to read recipe files
 def full_path(file_name: str) -> str:
     cwd = os.getcwd()
-    dir_name = 'recipes_and_standards'
+    dir_name = "recipes_and_standards"
     return os.path.join(cwd, dir_name, file_name)
+
 
 # Open the file to read
 # with open(full_path, 'r') as file:
-    # lines = file.readlines()
+# lines = file.readlines()
 
 # list of recipe measurement units
-UNITS_OF_MEASURE = ['g', 'gram', 'oz', 'ounce', 'lb', 'pound', 'ea', 'each', 'sm', 'small', 'med', 'medium', 'lg', 'large', 't', 'tsp', 'teaspoon', 'tbsp', 'tablespoon', 'c', 'cup', 'ml', 'l', 'qt', 'quart', 'liter', 'gal', 'gallon']
+UNITS_OF_MEASURE = [
+    "g",
+    "gram",
+    "oz",
+    "ounce",
+    "lb",
+    "pound",
+    "ea",
+    "each",
+    "clove",
+    "piece",
+    "handful",
+    "sm",
+    "small",
+    "med",
+    "medium",
+    "lg",
+    "large",
+    "t",
+    "tsp",
+    "teaspoon",
+    "tbsp",
+    "tablespoon",
+    "c",
+    "cup",
+    "ml",
+    "l",
+    "qt",
+    "quart",
+    "liter",
+    "gal",
+    "gallon",
+    "sheet",
+]
 
 
 # ingredients_start = lines.index('**INGREDIENTS**  \n')
@@ -22,35 +60,38 @@ UNITS_OF_MEASURE = ['g', 'gram', 'oz', 'ounce', 'lb', 'pound', 'ea', 'each', 'sm
 
 ingredients_list = []
 
+
 def search_for_recipe_files(directory: str) -> list:
     """
     Use the given string as a directory to get every file that has the word 'recipe' and ends with '.md'
     """
     recipe_files = []
     for filename in os.listdir(directory):
-        if filename.endswith('.md') and 'recipe' in filename:
+        if filename.endswith(".md") and "recipe" in filename:
             recipe_files.append(filename)
     return recipe_files
+
 
 def recipe_ingredients_section(file_path: str) -> list:
     """
     Use the given string as a filepath to open a file and return its contents.
 
-    Args: 
+    Args:
         file_path (str): The full filepath of the file
 
     Returns:
         list: A list of the lines containing the recipe ingredients.
     """
-    
-    with open(file_path, 'r') as file:
+
+    with open(file_path, "r") as file:
         lines = file.readlines()
 
-    if '**INGREDIENTS**  \n' in lines:
-        ingredients_start = lines.index('**INGREDIENTS**  \n')
-        if '  \n' in lines:
-            ingredients_end = lines.index('  \n', ingredients_start)
+    if "**INGREDIENTS**  \n" in lines:
+        ingredients_start = lines.index("**INGREDIENTS**  \n")
+        if "  \n" in lines:
+            ingredients_end = lines.index("  \n", ingredients_start)
             return lines[ingredients_start + 1 : ingredients_end]
+
 
 def is_unit_of_measure(word: str) -> bool:
     """
@@ -72,11 +113,12 @@ def is_unit_of_measure(word: str) -> bool:
     for unit in UNITS_OF_MEASURE:
         if word.lower() == unit:
             return True
-        elif word.lower() == unit + 's':
+        elif word.lower() == unit + "s":
             return True
 
     # If the above has not returned True, need to return False
     return False
+
 
 def is_ingredient_in_list(ingredient: str, ingredients_list: list) -> bool:
     """
@@ -99,16 +141,17 @@ def is_ingredient_in_list(ingredient: str, ingredients_list: list) -> bool:
     # Check if the ingredient is in the list and return the result
     return ingredient in ingredients_list
 
+
 def add_ingredient(ingredient: str, ingredients_list: list):
     """
     Add a given ingredient to the given list of ingredients.
 
-    Args: 
+    Args:
         ingredient (str): The ingredient to add to the list.
         ingredients_list (list): The list of ingredients to add to.
 
     Returns:
-        
+
     """
 
     # Check i fthe input parameters are of the correct type
@@ -122,15 +165,15 @@ def add_ingredient(ingredient: str, ingredients_list: list):
 
     # Check to see if ingredient is not in the list
     if not is_ingredient_in_list(ingredient, ingredients_list):
-    
         # Add the ingredient to the list
         ingredients_list.append(ingredient)
+
 
 def join_words(word: str, words: list) -> str:
     """
     Get the index of the word in a list, and return a string of all words remaining after the index of the given word.
 
-    Args: 
+    Args:
         word (str): The word to get the index of.
         words (list): The list of words to join.
 
@@ -147,7 +190,8 @@ def join_words(word: str, words: list) -> str:
     # Check if the word is in the list
     if word in words:
         i = words.index(word) + 1
-        return ' '.join(words[i:])
+        return " ".join(words[i:])
+
 
 def split_ingredient_line(line: str) -> list:
     """
@@ -159,19 +203,19 @@ def split_ingredient_line(line: str) -> list:
     ing = line
     # store ingredient(s) in list
     ing_list = []
-    
+
     # remove unit conversions listed in parentheses i.e. (1 cup) flour -> flour
-    pattern = '[(]*[)]'
+    pattern = "[(]*[)]"
     if re.search(pattern, ing):
         ing = re.split(pattern, ing)[1].lstrip()
 
     # remove commas i.e. red bell peppers, diced -> red bell peppers
-    pattern = ','
+    pattern = ","
     if pattern in ing:
         ing = ing.split(pattern)[0]
 
-    if ' or ' in ing:
-        ing = ing.split(' or ')[0]
+    if " or " in ing:
+        ing = ing.split(" or ")[0]
         # ing_alt = ing.split(' or ')[1]
         # [] TODO: extract ingredient from the ing_alt string
 
@@ -182,32 +226,30 @@ def split_ingredient_line(line: str) -> list:
         else:
             return s
 
-    ing = remove_ending_char(ing, '~') 
+    ing = remove_ending_char(ing, "~")
 
     # skip ingredients with these characters:
-    skip_chars = ['.', ']', '/']
+    skip_chars = [".", "]", "/"]
     for item in skip_chars:
         if item in ing:
             return None
 
     return ing
 
-recipes_files_list = search_for_recipe_files('recipes_and_standards')
+
+recipes_files_list = search_for_recipe_files("recipes_and_standards")
 
 for recipe_file in recipes_files_list:
     ingredients_section = recipe_ingredients_section(full_path(recipe_file))
-    
+
     if ingredients_section != None:
         for line in ingredients_section:
-
             words = line.split()
             for word in words:
-
                 if is_unit_of_measure(word):
-
                     ing = join_words(word, words)
                     ing = split_ingredient_line(ing)
-                    
+
                     # # remove unit conversions listed in parentheses i.e. 227 g (1 cup)
                     # pattern = '[(]*[)]'
                     # if re.search(pattern, ing):
@@ -227,9 +269,14 @@ for recipe_file in recipes_files_list:
                     # ing = remove_ending_char(ing, '~')
 
                     # # [] TODO: account for ingredients with an alternative ingredient listed after 'or'
-                    
+
                     if ing != None:
                         add_ingredient(ing, ingredients_list)
-            
-print(ingredients_list)
 
+end_time = time.time()
+execution_time = round((end_time - start_time) * 1000)
+print(f"Execution time: {execution_time} milliseconds")
+
+# sort ingredients_list alphabetically and print
+sorted_ingredients_list = sorted(ingredients_list)
+print(sorted_ingredients_list)
