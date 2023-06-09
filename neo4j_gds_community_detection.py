@@ -131,6 +131,7 @@ if __name__ == "__main__":
     communities = app.louvain_community_detection("flavor_graph")
     end = time.time()  # end timer
 
+    print("Results: ")
     print(f"Time elapsed: {round((end - start) * 1000)} milliseconds")
 
     # create a list of all the communities from the result only listing each community once
