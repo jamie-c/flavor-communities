@@ -4,6 +4,7 @@ from neo4j import GraphDatabase
 import os
 from dotenv.main import load_dotenv
 import time
+import json
 
 
 class App:
@@ -123,7 +124,7 @@ if __name__ == "__main__":
 
     flavor_graph = app.projected_graph("flavor_graph")
 
-    print("Running Louvain Community Detection using neo4j Graph Data Science...")
+    # print("Running Louvain Community Detection using neo4j Graph Data Science...")
 
     start = time.time()  # start timer
     # traverse the graph and get all flavor nodes
@@ -131,8 +132,15 @@ if __name__ == "__main__":
     communities = app.louvain_community_detection("flavor_graph")
     end = time.time()  # end timer
 
-    print("Results: ")
-    print(f"Time elapsed: {round((end - start) * 1000)} milliseconds")
+    # print("Results: ")
+    # print(f"Time elapsed: {round((end - start) * 1000)} milliseconds")
+
+    # generate json object for the louvain community detection results
+    data = {
+        "name": "louvain",
+        "method": "neo4j Graph Data Science",
+        "time_elapsed": round((end - start) * 1000),
+    }
 
     # create a list of all the communities from the result only listing each community once
     communityIds = []
@@ -142,12 +150,17 @@ if __name__ == "__main__":
 
     for id in communityIds:
         # print the communities in this format: Community CommunityId: name, name, name, ets...
-        print(f"Community {id}: ", end="")
+        # print(f"Community {id}: ", end="")
         names = []
         for community in communities:
             if community["communityId"] == id:
                 names.append(community["name"])
-        print(", ".join(names))
+        # print(", ".join(names))
+        data[f"Community {id}"] = names
+
+    json_object = json.dumps(data)
+
+    print(json_object)
 
     app.drop_graph("flavor_graph")
 

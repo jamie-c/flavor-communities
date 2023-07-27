@@ -1,3 +1,4 @@
+#! /usr/local/bin/python3.11
 # file test_update.py
 
 import requests
@@ -95,12 +96,12 @@ for item in flavors:
     # Iterate through the data and add to the flavor network
 
 
-print(f"Created {flavor_network}")
+# print(f"Created {flavor_network}")
 # print(dict(flavor_network.nodes.data()))
 # comp = nx.community.girvan_newman(flavor_network, most_valuable_edge=None)
 
 # print("Running community detection using Naive Greedy Modularity Maximization")
-print("Running Louvain Community Detection using networkx louvain_communities...")
+# print("Running Louvain Community Detection using networkx louvain_communities...")
 
 # log the time it takes to run the community detection algorithm
 start = time.time()  # start the timer
@@ -112,12 +113,27 @@ end = time.time()  # end the timer
 # plt.show()
 
 # print the results
-print(f"Results:")
+# print(f"Results:")
 # print the time in milliseconds
-print(f"Time elapsed: {round((end - start) * 1000)} milliseconds")
+# print(f"Time elapsed: {round((end - start) * 1000)} milliseconds")
+
+# generate json object for the louvain community detection results
+data = {
+    "name": "louvain",
+    "method": "networkX",
+    "time_elapsed": round((end - start) * 1000),
+}
 
 # loop through community detection results and print the community
 for i, community in enumerate(l):
-    print(f"Community {i}: ", end="")
+    # print(f"Community {i}: ", end="")
+    data[f"community_{i}"] = []
     # print the values of the set, separated by a comma and a space, and capitalize each word
-    print(", ".join(community).title())
+    # print(", ".join(community).title())
+    # enumerate through the community and add each community to the json object
+    for item in community:
+        data[f"community_{i}"].append(item)
+
+json_data = json.dumps(data)
+
+print(json_data)

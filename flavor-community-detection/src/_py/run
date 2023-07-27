@@ -1,0 +1,7 @@
+workon exaptive
+
+cd $WORKON_HOME/exaptive/exaptive/flavor-community-detection/src/_py
+
+python networkx_community_detection.py
+
+deactivate
