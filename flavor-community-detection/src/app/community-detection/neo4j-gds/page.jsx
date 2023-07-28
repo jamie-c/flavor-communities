@@ -1,4 +1,4 @@
-import WallPaper from '@/components/Wallpaper';
+import WallPaper from '@/components/WallPaper';
 import { Chip, Stack, Typography } from '@mui/material';
 
 const Neo4jResult = async () => {
