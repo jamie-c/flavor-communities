@@ -2,13 +2,26 @@
 
 import { exec } from 'child_process';
 import { NextResponse } from 'next/server';
+import path from 'path';
 import { promisify } from 'util';
 const execAsync = promisify(exec);
+
+// define path to python folder
+const pythonFolder = '_py'; 
+
+// get base path
+const cwd = process.cwd();
+
+// get base path
+const basePath = cwd.split('app')[0];
+
+// get path to run python script
+const pythonPath = path.join(basePath, pythonFolder, 'netx.sh');
 
 async function runPython() {
   try {
     // Replace 'python' with the path to your Python executable if needed
-    const { stdout, stderr } = await execAsync('$WORKON_HOME/exaptive/exaptive/flavor-community-detection/src/_py/netx.sh');
+    const { stdout, stderr } = await execAsync(pythonPath);
     if (stderr) {
       throw new Error(stderr);
     }
