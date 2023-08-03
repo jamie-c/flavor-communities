@@ -1,22 +1,16 @@
 // pages/api/networkx/index.js
 
+import { setPath } from '@/app/utils/setPath';
 import { exec } from 'child_process';
 import { NextResponse } from 'next/server';
-import path from 'path';
 import { promisify } from 'util';
 const execAsync = promisify(exec);
 
-// define path to python folder
-const pythonFolder = '_py'; 
+// define shell script to run python script
+const shellScript = 'neogds.sh';
 
-// get base path
-const cwd = process.cwd();
-
-// get base path
-const basePath = cwd.split('app')[0];
-
-// get path to run python script
-const pythonPath = path.join(basePath, pythonFolder, 'neogds.sh');
+// set path to run python script (via the shell script)
+const pythonPath = setPath(shellScript);
 
 async function runPython() {
   try {
