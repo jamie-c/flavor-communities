@@ -80,11 +80,12 @@ if __name__ == "__main__":
     load_dotenv()
     FN_DBMS_UN = os.environ["FN_DBMS_UN"]
     FN_DBMS_PW = os.environ["FN_DBMS_PW"]
+    FN_DBMS_URI = os.environ["FN_DBMS_URI"]
     # Aura queries use an encrypted connection using the "neo4j+s" URI scheme
     # uri = "neo4j+s://fb87e512.databases.neo4j.io"
     # user = "neo4j"
     # password = os.environ['FN_API_KEY']
-    uri = "bolt://localhost:7687"
+    uri = FN_DBMS_URI
     user = FN_DBMS_UN
     password = FN_DBMS_PW
     print(user, password)

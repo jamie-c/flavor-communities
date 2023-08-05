@@ -20,9 +20,9 @@ api_url = "https://tedtalks.cognitive.city/cnapi"
 api_route = "operations"
 payload = {'cityNamespace': 'main'}
 
-uri = "neo4j+s://fb87e512.databases.neo4j.io"
-user = "neo4j"
-password = "9fi9CdqeDf8FxJdmfWLw3cpA_rHgxYzLdDZA"
+uri = os.environ['FN_ADBMS_URI']
+user = os.environ['FN_ADBMS_UN']
+password = os.environ['FN_ADBMS_PW']
 app = example.App(uri, user, password)
 
 def list_elements(type_name):

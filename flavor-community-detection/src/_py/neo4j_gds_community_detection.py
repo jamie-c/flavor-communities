@@ -113,7 +113,7 @@ if __name__ == "__main__":
     # retrieve values from .env file
     FN_DBMS_UN = os.environ["FN_DBMS_UN"]
     FN_DBMS_PW = os.environ["FN_DBMS_PW"]
-    FN_DBMS_URI = "bolt://localhost:7687"
+    FN_DBMS_URI = os.environ["FN_DBMS_URI"]
 
     uri = FN_DBMS_URI
     user = FN_DBMS_UN
