@@ -16,8 +16,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # change to the directory of this file then src/_py
 cd $DIR
 
-# run a python script
-python networkx_community_detection.py
+# run python script
+python neo4j_gds_community_detection.py
 
 # deactivate the virtual environment
 deactivate

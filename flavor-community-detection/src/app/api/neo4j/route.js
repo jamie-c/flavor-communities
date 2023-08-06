@@ -7,7 +7,7 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 // define shell script to run python script
-const shellScript = 'neogds.sh';
+const shellScript = 'neog.sh';
 
 // set path to run python script (via the shell script)
 const pythonPath = setPath(shellScript);
